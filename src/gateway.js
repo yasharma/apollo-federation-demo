@@ -1,5 +1,8 @@
 const { ApolloServer } = require("apollo-server");
-const { ApolloGateway } = require("@apollo/gateway");
+const { ApolloGateway, IntrospectAndCompose } = require("@apollo/gateway");
+const {
+  ApolloServerPluginLandingPageGraphQLPlayground,
+} = require('apollo-server-core');
 
 const gateway = new ApolloGateway({
   // This entire `serviceList` is optional when running in managed federation
@@ -7,15 +10,16 @@ const gateway = new ApolloGateway({
   // using a single source of truth to compose a schema is recommended and
   // prevents composition failures at runtime using schema validation using
   // real usage-based metrics.
-  serviceList: [
-    { name: "accounts", url: "http://localhost:4001/graphql" },
-    { name: "reviews", url: "http://localhost:4002/graphql" },
-    { name: "products", url: "http://localhost:4003/graphql" },
-    { name: "inventory", url: "http://localhost:4004/graphql" }
-  ],
-
-  // Experimental: Enabling this enables the query plan view in Playground.
-  __exposeQueryPlanExperimental: false,
+  // serviceList: [
+  //   { name: "accounts", url: process.env.ACCOUNT_URL },
+  //   { name: "products", url: process.env.PRODUCT_URL },
+  // ],
+  supergraphSdl: new IntrospectAndCompose({
+    subgraphs: [
+      { name: "accounts", url: process.env.ACCOUNT_URL },
+    { name: "products", url: process.env.PRODUCT_URL },
+    ],
+  }),
 });
 
 (async () => {
@@ -29,9 +33,12 @@ const gateway = new ApolloGateway({
 
     // Subscriptions are unsupported but planned for a future Gateway version.
     subscriptions: false,
+    plugins: [
+      ApolloServerPluginLandingPageGraphQLPlayground(),
+    ],
   });
 
-  server.listen().then(({ url }) => {
+  server.listen({ port: 80 }).then(({ url }) => {
     console.log(`🚀 Server ready at ${url}`);
   });
 })();

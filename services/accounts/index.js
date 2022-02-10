@@ -16,6 +16,7 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     me() {
+      console.log('accounts service hit!')
       return users[0];
     }
   },
@@ -35,7 +36,7 @@ const server = new ApolloServer({
   ])
 });
 
-server.listen({ port: 4001 }).then(({ url }) => {
+server.listen({ port: 80 }).then(({ url }) => {
   console.log(`🚀 Server ready at ${url}`);
 });
 

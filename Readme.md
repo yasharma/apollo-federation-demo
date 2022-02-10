@@ -6,26 +6,53 @@ This repository is a demo of using Apollo Federation to build a single schema on
 
 To run this demo locally, pull down the repository then run the following commands:
 
+1. build the docker image for two services (accounts and products) for testing
 ```sh
-npm install
+cd services/accounts
+docker build -t accounts .
+```
+```sh
+cd services/products
+docker build -t products .
 ```
 
 This will install all of the dependencies for the gateway and each underlying service.
 
+in the root directory
 ```sh
-npm run start-services
+yarn install
+docker-compose --compatibility up 
+```
+compatibility option is to accept the deploy option for docker
+
+This command will run all 3 microservices at once.
+
+gateway serve it at http://localhost:4000, paste following query, which will take data from both accounts and products
+```
+{
+  me {
+    id,
+    name,
+    username
+  }
+  topProducts {
+    name,
+    price,
+    upc,
+    weight
+  }
+}
 ```
 
-This command will run all of the microservices at once. They can be found at http://localhost:4001, http://localhost:4002, http://localhost:4003, and http://localhost:4004.
-
-In another terminal window, run the gateway by running this command:
-
-```sh
-npm run start-gateway
+you can see in the logs the request will show following output when you will hit the request
 ```
-
-This will start up the gateway and serve it at http://localhost:4000
-
+products_1  | Product service hit!
+products_2  | Product service hit!
+```
+now to demonstrate that request served by both replics, use abs (apache benchmark testing tool)
+```
+ab -p post_body.txt -T application/json -c 10 -n 2000 http://localhost:4000/graphql
+``` 
 ### What is this?
 
 This demo showcases four partial schemas running as federated microservices. Each of these schemas can be accessed on their own and form a partial shape of an overall schema. The gateway fetches the service capabilities from the running services to create an overall composed schema which can be queried. 

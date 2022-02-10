@@ -1,0 +1,5 @@
+{
+  "operationName": null,
+  "variables": {},
+  "query": "{  me {    id    name    username  }  topProducts {    name    price    upc    weight  }}"
+}

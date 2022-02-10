@@ -1,0 +1,37 @@
+version: "3"
+services:
+  accounts:
+    image: accounts
+    # ports:
+    #   - 4001:80
+    deploy:
+      mode: replicated
+      replicas: 2  
+  
+  products:
+    image: products
+    # ports:
+    #   - 4002:80
+    deploy:
+      mode: replicated
+      replicas: 2  
+
+  gateway:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    environment:
+      # NODE_ENV: production # to test production builds enable this.
+      ACCOUNT_URL: http://accounts:80/graphql
+      PRODUCT_URL: http://products:80/graphql
+    ports:
+      - 4000:80
+    depends_on:
+      - accounts
+      - products  
+    volumes:
+      - gateway-modules-volume:/app/node_modules
+      - ./src:/app/src
+    
+volumes:
+  gateway-modules-volume:

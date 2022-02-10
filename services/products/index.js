@@ -22,6 +22,7 @@ const resolvers = {
   },
   Query: {
     topProducts(_, args) {
+      console.log('Product service hit!');
       return products.slice(0, args.first);
     }
   }
@@ -36,7 +37,7 @@ const server = new ApolloServer({
   ])
 });
 
-server.listen({ port: 4003 }).then(({ url }) => {
+server.listen({ port: 80 }).then(({ url }) => {
   console.log(`🚀 Server ready at ${url}`);
 });
 
